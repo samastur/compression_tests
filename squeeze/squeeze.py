@@ -67,12 +67,18 @@ def test_compression(filename, config):
     return st
 
 
+def clean_files(dirname):
+    shutil.rmtree(dirname)
+
+
 @click.command()
+@click.option('--clean', is_flag=True, default=False,
+              help='Remove test compressed files')
 @click.option('--config', 'configuration', required=True, envvar='DIET_CONFIG',
               type=click.Path(exists=True))
 @click.argument('test_dir', type=click.Path(exists=True))
 @click.argument('output_dir', type=click.Path(exists=True))
-def squeeze(test_dir, output_dir, configuration):
+def squeeze(test_dir, output_dir, configuration, clean):
     """Simple program that copies test_dir to output_dir, compresseses all
     images it finds in it and outputs efficiency stats."""
     total_time = total_size = total_reduced_size = no_files = 0
@@ -98,6 +104,9 @@ def squeeze(test_dir, output_dir, configuration):
                 total_time += stats.time
                 total_size += stats.orig_size
                 total_reduced_size += stats.new_size
+
+    if clean:
+        clean_files(files)
 
     summary = """\
 
